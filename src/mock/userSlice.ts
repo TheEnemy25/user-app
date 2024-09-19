@@ -68,4 +68,5 @@ export const {
   deleteUser,
   resetSelectedUser,
 } = userSlice.actions;
+
 export default userSlice.reducer;

@@ -3,11 +3,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../store/store";
 import { selectUser, updateUser, resetSelectedUser } from "../mock/userSlice";
 import { countries, departments, statuses } from "../mock/mockData";
+import { User } from "../types/types";
 
 const EditUser = () => {
   const dispatch: AppDispatch = useDispatch();
   const { users, selectedUser } = useSelector((state: RootState) => state.user);
-  const [formData, setFormData] = useState(selectedUser || null);
+  const [formData, setFormData] = useState<User | null>(selectedUser);
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,8 @@ const EditUser = () => {
     if (formData) {
       dispatch(updateUser(formData));
       setIsDirty(false);
+      // Reset formData to reflect changes
+      dispatch(selectUser(formData.name));
     }
   };
 
@@ -47,7 +50,13 @@ const EditUser = () => {
     setFormData((prev) => {
       if (prev) {
         setIsDirty(true);
-        return { ...prev, [field]: e.target.value };
+        return {
+          ...prev,
+          [field]: {
+            name: e.target.options[e.target.selectedIndex].text,
+            value: e.target.value,
+          },
+        };
       }
       return prev;
     });
