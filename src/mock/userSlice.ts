@@ -1,20 +1,18 @@
+// userSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { users, departments, countries, statuses } from "./mockData";
 
+interface FilterState {
+  selectedDepartments: string[];
+  selectedCountry: string;
+  selectedStatus: string;
+}
+
 interface User {
   name: string;
-  status: {
-    name: string;
-    value: string;
-  };
-  department: {
-    name: string;
-    value: string;
-  };
-  country: {
-    name: string;
-    value: string;
-  };
+  status: { name: string; value: string };
+  department: { name: string; value: string };
+  country: { name: string; value: string };
 }
 
 interface UserState {
@@ -23,6 +21,7 @@ interface UserState {
   countries: { name: string; value: string }[];
   statuses: { name: string; value: string }[];
   selectedUser: User | null;
+  filters: FilterState;
 }
 
 const initialState: UserState = {
@@ -31,6 +30,11 @@ const initialState: UserState = {
   countries,
   statuses,
   selectedUser: null,
+  filters: {
+    selectedDepartments: [],
+    selectedCountry: "",
+    selectedStatus: "",
+  },
 };
 
 const userSlice = createSlice({
@@ -58,6 +62,26 @@ const userSlice = createSlice({
     resetSelectedUser(state) {
       state.selectedUser = null;
     },
+    updateFilters(state, action: PayloadAction<Partial<FilterState>>) {
+      const filters = action.payload;
+      state.filters = { ...state.filters, ...filters };
+
+      // Reset other filters if less than 3 departments are selected
+      if (
+        filters.selectedDepartments &&
+        filters.selectedDepartments.length < 3
+      ) {
+        state.filters.selectedCountry = "";
+        state.filters.selectedStatus = "";
+      }
+    },
+    resetFilters(state) {
+      state.filters = {
+        selectedDepartments: [],
+        selectedCountry: "",
+        selectedStatus: "",
+      };
+    },
   },
 });
 
@@ -67,6 +91,8 @@ export const {
   addUser,
   deleteUser,
   resetSelectedUser,
+  updateFilters,
+  resetFilters,
 } = userSlice.actions;
 
 export default userSlice.reducer;
