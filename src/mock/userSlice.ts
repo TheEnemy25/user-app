@@ -1,4 +1,3 @@
-// userSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { users, departments, countries, statuses } from "./mockData";
 
@@ -66,7 +65,6 @@ const userSlice = createSlice({
       const filters = action.payload;
       state.filters = { ...state.filters, ...filters };
 
-      // Reset other filters if less than 3 departments are selected
       if (
         filters.selectedDepartments &&
         filters.selectedDepartments.length < 3

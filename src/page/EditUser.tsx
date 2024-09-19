@@ -3,35 +3,20 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../store/store";
 import { selectUser, updateUser, resetSelectedUser } from "../mock/userSlice";
 import { countries, departments, statuses } from "../mock/mockData";
-import { User } from "../types/types";
+import InputField from "../components/InputField";
+import SelectField from "../components/SelectField";
+import Button from "../components/Button";
 
 const EditUser = () => {
   const dispatch: AppDispatch = useDispatch();
   const { users, selectedUser } = useSelector((state: RootState) => state.user);
-  const [formData, setFormData] = useState<User | null>(selectedUser);
+  const [formData, setFormData] = useState(selectedUser);
   const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     setFormData(selectedUser);
-  }, [selectedUser]);
-
-  const handleSelectUser = (name: string) => {
-    dispatch(selectUser(name));
-  };
-
-  const handleUpdateUser = () => {
-    if (formData) {
-      dispatch(updateUser(formData));
-      setIsDirty(false);
-      // Reset formData to reflect changes
-      dispatch(selectUser(formData.name));
-    }
-  };
-
-  const handleUndo = () => {
-    dispatch(resetSelectedUser());
     setIsDirty(false);
-  };
+  }, [selectedUser]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => {
@@ -62,104 +47,84 @@ const EditUser = () => {
     });
   };
 
-  return (
-    <div className="flex flex-col p-4 bg-white">
-      <h2 className="text-lg font-bold mb-4 text-center">Edit User</h2>
+  const handleSelectUser = (name: string) => {
+    dispatch(selectUser(name));
+  };
 
-      <select
-        className="mb-4 p-2 border border-gray-300 rounded"
-        onChange={(e) => handleSelectUser(e.target.value)}
-        defaultValue=""
-      >
-        <option value="">Select a user</option>
-        {users.map((user) => (
-          <option key={user.name} value={user.name}>
-            {user.name}
-          </option>
-        ))}
-      </select>
+  const handleUpdateUser = () => {
+    if (formData) {
+      dispatch(updateUser(formData));
+      setIsDirty(false);
+    }
+  };
+
+  const handleUndo = () => {
+    dispatch(resetSelectedUser());
+    setIsDirty(false);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto pt-20 pb-8 bg-white">
+      <h1 className="text-6xl tracking-widest mb-20 text-center karla medium">
+        EDIT USER
+      </h1>
+
+      <div className="mb-20 w-2/4">
+        <SelectField
+          label="User"
+          value={formData?.name || ""}
+          options={users.map((user) => ({ name: user.name, value: user.name }))}
+          onChange={(e) => handleSelectUser(e.target.value)}
+        />
+      </div>
 
       {formData && (
         <div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Full Name:</label>
-            <input
-              type="text"
+          <h3 className="text-lg font-semibold mb-4">User Information</h3>
+          <div className="grid grid-cols-2 gap-6">
+            <InputField
+              label="Full Name"
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="p-2 border border-gray-300 rounded"
+            />
+
+            <SelectField
+              label="Department"
+              value={formData.department.value}
+              options={departments}
+              onChange={(e) => handleSelectChange(e, "department")}
+            />
+
+            <SelectField
+              label="Country"
+              value={formData.country.value}
+              options={countries}
+              onChange={(e) => handleSelectChange(e, "country")}
+            />
+
+            <SelectField
+              label="Status"
+              value={formData.status.value}
+              options={statuses}
+              onChange={(e) => handleSelectChange(e, "status")}
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700">Department:</label>
-            <select
-              value={formData.department.value}
-              onChange={(e) => handleSelectChange(e, "department")}
-              className="p-2 border border-gray-300 rounded"
-            >
-              <option value="">Select Department</option>
-              {departments.map((department) => (
-                <option key={department.value} value={department.value}>
-                  {department.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="flex justify-end space-x-4 mt-6">
+            {isDirty && (
+              <Button onClick={handleUndo} className="text-black">
+                Undo
+              </Button>
+            )}
 
-          <div className="mb-4">
-            <label className="block text-gray-700">Country:</label>
-            <select
-              value={formData.country.value}
-              onChange={(e) => handleSelectChange(e, "country")}
-              className="p-2 border border-gray-300 rounded"
-            >
-              <option value="">Select Country</option>
-              {countries.map((country) => (
-                <option key={country.value} value={country.value}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700">Status:</label>
-            <select
-              value={formData.status.value}
-              onChange={(e) => handleSelectChange(e, "status")}
-              className="p-2 border border-gray-300 rounded"
-            >
-              <option value="">Select Status</option>
-              {statuses.map((status) => (
-                <option key={status.value} value={status.value}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex space-x-4">
-            <button
-              onClick={handleUndo}
-              className={`px-4 py-2 border rounded ${
-                isDirty ? "bg-red-500 text-white" : "bg-gray-500 text-white"
-              }`}
-              style={{ display: isDirty ? "inline-block" : "none" }}
-            >
-              Undo
-            </button>
-
-            <button
+            <Button
               onClick={handleUpdateUser}
-              className={`px-4 py-2 border rounded ${
-                isDirty ? "bg-blue-500 text-white" : "bg-gray-500 text-white"
-              }`}
+              className={isDirty ? "text-black" : "text-gray-300"}
               disabled={!isDirty}
             >
               Save
-            </button>
+            </Button>
           </div>
         </div>
       )}
